@@ -1,0 +1,7 @@
+﻿services:
+  ecomtik:
+    image: ecomtik
+    build:
+      context: .
+      dockerfile: Ecomtik/Dockerfile
+
