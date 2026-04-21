@@ -1,31 +1,29 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
+using Microsoft.EntityFrameworkCore;
+using Ecomtik.Data;
+using Ecomtik.Strategies;
 
 var builder = WebApplication.CreateBuilder(args);
+var connStr = builder.Configuration.GetConnectionString("Default");
+Console.WriteLine($"Connection string: {connStr}");
 
-// Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAdB2C"));
+builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+
+builder.Services.AddCors(options => options.AddPolicy("AllowAll",
+    policy => policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IIntegrationFactory, IntegrationFactory>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseCors("AllowAll");
 app.MapControllers();
+
+using var scope = app.Services.CreateScope();
+scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
 
 app.Run();
