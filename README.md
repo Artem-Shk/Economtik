@@ -1,2 +1,2 @@
 # Economtik
-Economtik repo with base math functions
+Economtik repo with base math functions release soon
