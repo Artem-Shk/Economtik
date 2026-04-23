@@ -1,0 +1,179 @@
+<div class="page">
+  <header class="page-header">
+    <h1 class="page-title">Калькулятор интегралов</h1>
+    <p class="page-lead">
+      Численное интегрирование на отрезке <span class="mono">[a, b]</span> для функции
+      <span class="mono">f(x)</span>.
+    </p>
+  </header>
+
+  @if (error(); as err) {
+    <div class="alert" role="alert">{{ err }}</div>
+  }
+
+  <div class="layout">
+    <section class="card card--params" aria-labelledby="params-heading">
+      <h2 id="params-heading" class="card-title">Параметры интеграла</h2>
+      <div class="card-body">
+        <form
+          class="form"
+          (submit)="$event.preventDefault(); onSubmit()"
+          [attr.aria-busy]="submitting()"
+        >
+          <div class="field">
+            <label for="fn">Функция <span class="mono">f(x)</span></label>
+            <input
+              id="fn"
+              class="input input--mono"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              [value]="functionExpr()"
+              (input)="onFunctionInput($event)"
+            />
+            <p class="hint">
+              Используйте переменную <span class="mono">x</span>, операторы <span class="mono">+ − * / ^</span>,
+              скобки; при необходимости <span class="mono">sin</span>, <span class="mono">cos</span>,
+              <span class="mono">pi</span>.
+            </p>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="a">Нижняя граница <span class="mono">a</span></label>
+              <input
+                id="a"
+                class="input input--mono"
+                type="text"
+                inputmode="decimal"
+                [value]="boundA()"
+                (input)="onBoundAInput($event)"
+              />
+            </div>
+            <div class="field">
+              <label for="b">Верхняя граница <span class="mono">b</span></label>
+              <input
+                id="b"
+                class="input input--mono"
+                type="text"
+                inputmode="decimal"
+                [value]="boundB()"
+                (input)="onBoundBInput($event)"
+              />
+            </div>
+            <div class="field">
+              <label for="steps">Шаги <span class="mono">n</span></label>
+              <input
+                id="steps"
+                class="input input--mono"
+                type="number"
+                min="1"
+                step="1"
+                [value]="steps()"
+                (input)="onStepsInput($event)"
+              />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="method">Метод</label>
+            <select
+              id="method"
+              class="input input--select"
+              [disabled]="methodsLoading()"
+              [value]="methodCode()"
+              (change)="onMethodChange($event)"
+            >
+              @for (m of methods(); track m.code) {
+                <option [value]="m.code">{{ m.name }}</option>
+              }
+            </select>
+            @if (methodsLoading()) {
+              <p class="hint hint--muted">Загрузка списка методов…</p>
+            }
+          </div>
+
+          <div class="actions">
+            <button
+              type="submit"
+              class="btn btn--primary"
+              [disabled]="!canSubmit()"
+              [attr.aria-busy]="submitting()"
+            >
+              @if (submitting()) {
+                <span class="spinner" aria-hidden="true"></span>
+              }
+              Вычислить
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <section class="card card--result" aria-labelledby="result-heading">
+      <h2 id="result-heading" class="card-title">Результат</h2>
+      <div class="card-body card-body--result">
+        @if (lastResult(); as r) {
+          <p class="result-value">
+            <span class="result-label">∫ f(x) dx ≈</span>
+            <span class="result-number mono">{{ r.result | number: '1.0-10' }}</span>
+          </p>
+          <dl class="result-meta">
+            <div>
+              <dt>Время</dt>
+              <dd class="mono">{{ r.durationMs }} мс</dd>
+            </div>
+            <div>
+              <dt>Запись</dt>
+              <dd class="mono">#{{ r.id }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="placeholder">Здесь появится значение интеграла после вычисления.</p>
+        }
+      </div>
+    </section>
+  </div>
+
+  <section class="card card--history" aria-labelledby="history-heading">
+    <h2 id="history-heading" class="card-title">История</h2>
+    <div class="card-body card-body--flush">
+      @if (historyLoading()) {
+        <p class="placeholder">Загрузка истории…</p>
+      } @else if (history().length === 0) {
+        <p class="empty">Пока нет сохранённых вычислений.</p>
+      } @else {
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th scope="col">Когда</th>
+                <th scope="col">f(x)</th>
+                <th scope="col" class="num">a</th>
+                <th scope="col" class="num">b</th>
+                <th scope="col">Метод</th>
+                <th scope="col" class="num">n</th>
+                <th scope="col" class="num">Результат</th>
+                <th scope="col" class="num">мс</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of history(); track row.id) {
+                <tr>
+                  <td class="mono muted">{{ row.createdAt | date: 'short' }}</td>
+                  <td class="mono expr">{{ row.functionExpr }}</td>
+                  <td class="mono num">{{ row.lowerBound | number: '1.0-4' }}</td>
+                  <td class="mono num">{{ row.upperBound | number: '1.0-4' }}</td>
+                  <td>{{ row.method }}</td>
+                  <td class="mono num">{{ row.steps }}</td>
+                  <td class="mono num">{{ row.result | number: '1.0-6' }}</td>
+                  <td class="mono num">{{ row.durationMs }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
+</div>

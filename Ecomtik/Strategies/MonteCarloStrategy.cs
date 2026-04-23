@@ -2,7 +2,7 @@
 
 public class MonteCarloStrategy : IIntegrationStrategy
 {
-    
+ 
     public double Compute(Func<double, double> f, double a, double b, int n)
     {
         Random rnd = new();

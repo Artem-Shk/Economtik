@@ -1,0 +1,42 @@
+:root {
+  --color-bg: #0b0d12;
+  --color-bg-subtle: #11141c;
+  --color-surface: #151922;
+  --color-surface-hover: #1b2030;
+  --color-border: #272d3d;
+  --color-border-strong: #3a4258;
+  --color-text: #eceef4;
+  --color-text-muted: #939bb0;
+  --color-accent: #8ab4ff;
+  --color-accent-soft: rgba(138, 180, 255, 0.12);
+  --color-focus-ring: rgba(138, 180, 255, 0.28);
+  --color-danger: #f08080;
+  --shadow-card: 0 14px 44px rgba(0, 0, 0, 0.38);
+  --radius-card: 14px;
+  --radius-control: 10px;
+  --font-sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+  --space-page: clamp(1rem, 2.8vw, 1.85rem);
+  --max-content: 1120px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: radial-gradient(120% 80% at 50% -10%, #1a2234 0%, var(--color-bg) 52%);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+}
