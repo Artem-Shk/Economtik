@@ -2,6 +2,10 @@
 
 public class TrapezoidalStrategy : IIntegrationStrategy
 {
+    /*
+     * Метод трапеции
+     * принцип сумма площадей трапеции 
+     */
     public double Compute(Func<double, double> f, double a, double b, int n)
     {
         double h = (b - a) / n;
